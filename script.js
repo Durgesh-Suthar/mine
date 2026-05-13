@@ -279,14 +279,7 @@ function startGameLoop() {
     catchEffects = [];
 
     // Spawn shooting stars periodically
-    function scheduleSpawn() {
-        if (!gameActive) return;
-        if (shootingStars.length < 4) {
-            shootingStars.push(new ShootingStar(gameCanvas.width, gameCanvas.height));
-        }
-        spawnTimer = setTimeout(scheduleSpawn, 800 + Math.random() * 1200);
-    }
-    scheduleSpawn();
+    startSpawnTimer();
 
     // Spawn two stars immediately so user sees something right away
     shootingStars.push(new ShootingStar(gameCanvas.width, gameCanvas.height));
@@ -303,12 +296,18 @@ function startGameLoop() {
     tapHandler = function handleTap(e) {
         if (!gameActive) return;
 
+        // Don't process taps if popup is visible
+        const popup = document.getElementById('wish-popup');
+        if (popup && popup.classList.contains('show')) return;
+
         let px, py;
         if (e.type === 'touchstart') {
             e.preventDefault();
             px = e.touches[0].clientX;
             py = e.touches[0].clientY;
         } else {
+            // Ignore click events on touch devices (touchstart already handled it)
+            if ('ontouchstart' in window && e.type === 'click') return;
             px = e.clientX;
             py = e.clientY;
         }
@@ -340,7 +339,7 @@ function startGameLoop() {
     // Main animation loop
     function mainLoop() {
         if (!gameActive) {
-            animFrame = requestAnimationFrame(mainLoop); // keep checking
+            animFrame = requestAnimationFrame(mainLoop);
             // Still draw effects even when paused (popup showing)
             gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
             updateAndDrawCatchEffects(gameCtx);
@@ -373,6 +372,20 @@ function startGameLoop() {
     mainLoop();
 }
 
+// Separated spawn timer so it can be restarted on resume
+function startSpawnTimer() {
+    if (spawnTimer) clearTimeout(spawnTimer);
+
+    function scheduleSpawn() {
+        if (!gameActive) return; // Will be restarted by resumeGame()
+        if (gameCanvas && shootingStars.length < 4) {
+            shootingStars.push(new ShootingStar(gameCanvas.width, gameCanvas.height));
+        }
+        spawnTimer = setTimeout(scheduleSpawn, 800 + Math.random() * 1200);
+    }
+    scheduleSpawn();
+}
+
 // ===== TAP RIPPLE FEEDBACK =====
 let tapRipples = [];
 
@@ -399,6 +412,29 @@ function updateAndDrawTapRipples(ctx) {
         ctx.stroke();
     }
     ctx.globalAlpha = 1;
+}
+
+// ===== PAUSE / RESUME HELPERS =====
+function pauseGame() {
+    gameActive = false;
+    // Stop the spawn timer — it will be restarted on resume
+    if (spawnTimer) {
+        clearTimeout(spawnTimer);
+        spawnTimer = null;
+    }
+}
+
+function resumeGame() {
+    gameActive = true;
+
+    // Clear dead stars, then guarantee fresh ones to catch
+    shootingStars = shootingStars.filter(s => s.isAlive());
+    while (shootingStars.length < 3) {
+        shootingStars.push(new ShootingStar(gameCanvas.width, gameCanvas.height));
+    }
+
+    // Restart the periodic spawner
+    startSpawnTimer();
 }
 
 // ===== ON STAR CAUGHT =====
@@ -445,7 +481,7 @@ function onStarCaught() {
     popup.classList.add('show');
 
     // Pause game while popup is showing
-    gameActive = false;
+    pauseGame();
 }
 
 function closeWishPopup() {
@@ -456,12 +492,10 @@ function closeWishPopup() {
         // All wishes caught!
         setTimeout(showRevealScreen, 600);
     } else {
-        // Resume game
-        gameActive = true;
-        // Ensure we have stars to catch
-        if (shootingStars.length < 2) {
-            shootingStars.push(new ShootingStar(gameCanvas.width, gameCanvas.height));
-        }
+        // Resume game after a brief delay so popup finishes hiding
+        setTimeout(() => {
+            resumeGame();
+        }, 100);
     }
 }
 
