@@ -246,10 +246,11 @@ function updateAndDrawCatchEffects(ctx) {
             p.vx *= 0.99; // friction
             p.life -= p.decay;
 
+            const radius = Math.max(0, p.size * p.life);
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+            ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
             ctx.fillStyle = p.color;
-            ctx.globalAlpha = p.life * 0.9;
+            ctx.globalAlpha = Math.max(0, p.life * 0.9);
             ctx.fill();
         }
 
@@ -478,44 +479,57 @@ function showRevealScreen() {
 function launchHeartConfetti() {
     const canvas = document.getElementById('heart-canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
 
-    const pieces = [];
-    const emojis = ['⭐', '✨', '💙', '💫', '🌟', '🦋', '💎', '🌸'];
+    let pieces = [];
+    const emojis = ['⭐', '✨', '💙', '💫', '🌟', '🦋', '💎', '🌸', '💖'];
 
-    function addBurst(count) {
+    function addBurst(count, isInitial = false) {
         for (let i = 0; i < count; i++) {
             pieces.push({
                 x: Math.random() * canvas.width,
-                y: -20 - Math.random() * canvas.height * 0.5,
-                vy: 1 + Math.random() * 2.5,
-                vx: (Math.random() - 0.5) * 2,
+                y: isInitial ? (Math.random() * -canvas.height) : -50,
+                vy: 0.8 + Math.random() * 2.2,
+                vx: (Math.random() - 0.5) * 1.5,
+                sway: Math.random() * Math.PI * 2,
+                swaySpeed: 0.02 + Math.random() * 0.04,
+                swayAmplitude: 0.5 + Math.random() * 1.5,
                 emoji: emojis[Math.floor(Math.random() * emojis.length)],
-                size: 12 + Math.random() * 18,
+                size: 14 + Math.random() * 20,
                 rotation: Math.random() * 360,
-                rotSpeed: (Math.random() - 0.5) * 4,
+                rotSpeed: (Math.random() - 0.5) * 3,
                 alpha: 1,
-                decay: 0.0008 + Math.random() * 0.0015
+                decay: 0.0004 + Math.random() * 0.0008
             });
         }
     }
 
-    addBurst(80);
+    addBurst(60, true);
 
     function animate() {
+        if (pieces.length === 0 && bursts >= 5) return;
+        
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let alive = false;
-
-        for (let i = 0; i < pieces.length; i++) {
+        
+        for (let i = pieces.length - 1; i >= 0; i--) {
             const p = pieces[i];
-            if (p.alpha <= 0) continue;
-            alive = true;
-
-            p.x += p.vx;
+            
+            p.sway += p.swaySpeed;
+            p.x += p.vx + Math.sin(p.sway) * p.swayAmplitude;
             p.y += p.vy;
             p.rotation += p.rotSpeed;
             p.alpha -= p.decay;
+
+            if (p.alpha <= 0 || p.y > canvas.height + 50) {
+                pieces.splice(i, 1);
+                continue;
+            }
 
             ctx.save();
             ctx.translate(p.x, p.y);
@@ -529,32 +543,44 @@ function launchHeartConfetti() {
         }
 
         ctx.globalAlpha = 1;
-        if (alive) requestAnimationFrame(animate);
+        requestAnimationFrame(animate);
     }
     requestAnimationFrame(animate);
 
-    // Re-burst
     let bursts = 0;
     const bi = setInterval(() => {
         bursts++;
-        if (bursts >= 5) { clearInterval(bi); return; }
-        addBurst(40);
-    }, 2500);
+        if (bursts >= 8) { clearInterval(bi); return; }
+        addBurst(25);
+    }, 1800);
 
     window._confettiBurstInterval = bi;
 }
 
 function spawnFloatingStars() {
-    const emojis = ['✨', '⭐', '💫', '🌟', '💙'];
+    const emojis = ['✨', '⭐', '💫', '🌟', '💙', '🌸', '✨'];
     const interval = setInterval(() => {
         const el = document.createElement('div');
         el.className = 'floating-emoji';
-        el.style.left = Math.random() * 100 + 'vw';
-        el.style.fontSize = (0.8 + Math.random() * 1.2) + 'rem';
+        
+        // Randomize properties for a more organic feel
+        const duration = 5 + Math.random() * 4;
+        const left = Math.random() * 100;
+        const size = 0.8 + Math.random() * 1.5;
+        const delay = Math.random() * 2;
+        
+        el.style.left = `${left}vw`;
+        el.style.fontSize = `${size}rem`;
+        el.style.animationDuration = `${duration}s`;
+        el.style.animationDelay = `${delay}s`;
+        el.style.filter = `blur(${Math.random() > 0.8 ? '1px' : '0'})`;
+        
         el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 5000);
-    }, 600);
+        
+        // Cleanup
+        setTimeout(() => el.remove(), (duration + delay) * 1000);
+    }, 450);
 
     window._floatInterval = interval;
 }
