@@ -502,16 +502,18 @@ body {
     display: inline-block;
     margin: 0 auto 30px;
     width: 100%;
-    max-width: 500px;
+    max-width: 520px;
+    padding: 0 10px;
 }
 
 .reveal-image {
-    width: clamp(260px, 85vw, 450px);
+    width: clamp(300px, 93vw, 520px);
     height: auto;
-    aspect-ratio: 21 / 9;
-    border-radius: 20px;
+    aspect-ratio: 16 / 7;
+    border-radius: 16px;
     object-fit: cover;
-    border: 3px solid rgba(255, 255, 255, 0.2);
+    object-position: center;
+    border: 2px solid rgba(255, 255, 255, 0.15);
     box-shadow:
         0 0 40px rgba(59, 130, 246, 0.3),
         0 0 80px rgba(167, 139, 250, 0.15),
