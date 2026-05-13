@@ -506,118 +506,136 @@ function showRevealScreen() {
     if (animFrame) cancelAnimationFrame(animFrame);
 
     switchScreen('reveal-screen');
-    launchHeartConfetti();
-    spawnFloatingStars();
+    launchConfetti();
 }
 
-function launchHeartConfetti() {
+function launchConfetti() {
     const canvas = document.getElementById('heart-canvas');
     const ctx = canvas.getContext('2d');
-    
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Palette of soft, beautiful colors
+    const colors = [
+        '#93c5fd', '#60a5fa', '#3b82f6',  // blues
+        '#c4b5fd', '#a78bfa', '#8b5cf6',  // purples
+        '#fbbf24', '#f59e0b',              // golds
+        '#67e8f9', '#22d3ee',              // cyans
+        '#f9a8d4', '#f472b6',              // pinks
+        '#ffffff'                           // white sparkle
+    ];
+
+    const pieces = [];
+    const SHAPE_RECT = 0, SHAPE_CIRCLE = 1, SHAPE_LINE = 2;
+
+    function createPiece(originX, originY) {
+        // Burst upward in a wide cone
+        const angle = -Math.PI / 2 + (Math.random() - 0.5) * 1.8;
+        const speed = 8 + Math.random() * 12;
+
+        return {
+            x: originX,
+            y: originY,
+            vx: Math.cos(angle) * speed * (0.7 + Math.random() * 0.6),
+            vy: Math.sin(angle) * speed,
+            gravity: 0.12 + Math.random() * 0.08,
+            drag: 0.97 + Math.random() * 0.02,
+            tilt: Math.random() * Math.PI * 2,
+            tiltSpeed: (Math.random() - 0.5) * 0.15,
+            w: 4 + Math.random() * 8,
+            h: 6 + Math.random() * 10,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            shape: Math.floor(Math.random() * 3),
+            alpha: 1,
+            decay: 0.003 + Math.random() * 0.004
+        };
     }
-    resize();
-    window.addEventListener('resize', resize);
 
-    let pieces = [];
-    const emojis = ['⭐', '✨', '💙', '💫', '🌟', '🦋', '💎', '🌸', '💖'];
-
-    function addBurst(count, isInitial = false) {
-        for (let i = 0; i < count; i++) {
-            pieces.push({
-                x: Math.random() * canvas.width,
-                y: isInitial ? (Math.random() * -canvas.height) : -50,
-                vy: 0.8 + Math.random() * 2.2,
-                vx: (Math.random() - 0.5) * 1.5,
-                sway: Math.random() * Math.PI * 2,
-                swaySpeed: 0.02 + Math.random() * 0.04,
-                swayAmplitude: 0.5 + Math.random() * 1.5,
-                emoji: emojis[Math.floor(Math.random() * emojis.length)],
-                size: 14 + Math.random() * 20,
-                rotation: Math.random() * 360,
-                rotSpeed: (Math.random() - 0.5) * 3,
-                alpha: 1,
-                decay: 0.0004 + Math.random() * 0.0008
-            });
-        }
+    // Initial burst from center-bottom
+    const cx = canvas.width / 2;
+    const cy = canvas.height;
+    for (let i = 0; i < 100; i++) {
+        pieces.push(createPiece(cx + (Math.random() - 0.5) * 200, cy));
     }
 
-    addBurst(60, true);
-
-    function animate() {
-        if (pieces.length === 0 && bursts >= 5) return;
-        
+    function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         for (let i = pieces.length - 1; i >= 0; i--) {
             const p = pieces[i];
-            
-            p.sway += p.swaySpeed;
-            p.x += p.vx + Math.sin(p.sway) * p.swayAmplitude;
+
+            // Physics
+            p.vx *= p.drag;
+            p.vy *= p.drag;
+            p.vy += p.gravity;
+            p.x += p.vx;
             p.y += p.vy;
-            p.rotation += p.rotSpeed;
+            p.tilt += p.tiltSpeed;
             p.alpha -= p.decay;
 
-            if (p.alpha <= 0 || p.y > canvas.height + 50) {
+            if (p.alpha <= 0 || p.y > canvas.height + 30) {
                 pieces.splice(i, 1);
                 continue;
             }
 
+            ctx.globalAlpha = p.alpha;
+            ctx.fillStyle = p.color;
+
             ctx.save();
             ctx.translate(p.x, p.y);
-            ctx.rotate((p.rotation * Math.PI) / 180);
-            ctx.globalAlpha = Math.max(0, p.alpha);
-            ctx.font = `${p.size}px serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(p.emoji, 0, 0);
+            ctx.rotate(p.tilt);
+            // Wobble = fake 3D by scaling X
+            ctx.scale(Math.cos(p.tilt * 1.5), 1);
+
+            if (p.shape === SHAPE_RECT) {
+                ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            } else if (p.shape === SHAPE_CIRCLE) {
+                ctx.beginPath();
+                ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Thin ribbon / line
+                ctx.strokeStyle = p.color;
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = p.alpha * 0.8;
+                ctx.beginPath();
+                ctx.moveTo(-p.h / 2, 0);
+                ctx.lineTo(p.h / 2, 0);
+                ctx.stroke();
+            }
+
             ctx.restore();
         }
 
         ctx.globalAlpha = 1;
-        requestAnimationFrame(animate);
+
+        if (pieces.length > 0) {
+            requestAnimationFrame(draw);
+        }
     }
-    requestAnimationFrame(animate);
+    requestAnimationFrame(draw);
 
-    let bursts = 0;
-    const bi = setInterval(() => {
-        bursts++;
-        if (bursts >= 8) { clearInterval(bi); return; }
-        addBurst(25);
-    }, 1800);
+    // Follow-up bursts from alternating sides
+    let burstCount = 0;
+    const burstInterval = setInterval(() => {
+        burstCount++;
+        if (burstCount > 4) {
+            clearInterval(burstInterval);
+            return;
+        }
+        const bx = burstCount % 2 === 0
+            ? Math.random() * canvas.width * 0.3
+            : canvas.width - Math.random() * canvas.width * 0.3;
+        for (let i = 0; i < 40; i++) {
+            pieces.push(createPiece(bx, canvas.height));
+        }
+    }, 1500);
 
-    window._confettiBurstInterval = bi;
+    window._confettiBurstInterval = burstInterval;
 }
 
-function spawnFloatingStars() {
-    const emojis = ['✨', '⭐', '💫', '🌟', '💙', '🌸', '✨'];
-    const interval = setInterval(() => {
-        const el = document.createElement('div');
-        el.className = 'floating-emoji';
-        
-        // Randomize properties for a more organic feel
-        const duration = 5 + Math.random() * 4;
-        const left = Math.random() * 100;
-        const size = 0.8 + Math.random() * 1.5;
-        const delay = Math.random() * 2;
-        
-        el.style.left = `${left}vw`;
-        el.style.fontSize = `${size}rem`;
-        el.style.animationDuration = `${duration}s`;
-        el.style.animationDelay = `${delay}s`;
-        el.style.filter = `blur(${Math.random() > 0.8 ? '1px' : '0'})`;
-        
-        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-        document.body.appendChild(el);
-        
-        // Cleanup
-        setTimeout(() => el.remove(), (duration + delay) * 1000);
-    }, 450);
-
-    window._floatInterval = interval;
-}
+// spawnFloatingStars removed — confetti handles the entire celebration
 
 // ===== SCREEN MANAGEMENT =====
 function switchScreen(id) {
@@ -640,9 +658,7 @@ function restartGame() {
     gameActive = false;
     if (spawnTimer) clearTimeout(spawnTimer);
     if (animFrame) cancelAnimationFrame(animFrame);
-    if (window._floatInterval) clearInterval(window._floatInterval);
     if (window._confettiBurstInterval) clearInterval(window._confettiBurstInterval);
-    document.querySelectorAll('.floating-emoji').forEach(el => el.remove());
 
     // Clean canvas
     const hc = document.getElementById('heart-canvas');
