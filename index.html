@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Wishing Stars ✨ Catch Your Wishes</title>
+    <meta name="description" content="An enchanting stargazing game — catch shooting stars and unlock magical wishes.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Starfield Canvas -->
+    <canvas id="starfield"></canvas>
+
+    <!-- ========== INTRO SCREEN ========== -->
+    <div id="intro-screen" class="screen active">
+        <div class="intro-content">
+            <div class="moon"></div>
+            <div class="intro-sparkle">✦</div>
+            <h1 class="intro-title">
+                <span class="title-word">Wishing</span>
+                <span class="title-word accent">Stars</span>
+            </h1>
+            <p class="intro-tagline">The night sky holds wishes meant only for you.</p>
+            <p class="intro-instruction">Catch the shooting stars before they fade…</p>
+            <button id="start-btn" class="magic-btn" onclick="startGame()">
+                <span class="btn-text">✨ Enter the Night Sky</span>
+                <span class="btn-shimmer"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ========== GAME SCREEN ========== -->
+    <div id="game-screen" class="screen">
+        <div class="game-hud">
+            <div class="hud-left">
+                <div class="hud-wishes">
+                    <span class="hud-label">Wishes Caught</span>
+                    <div class="wish-counter">
+                        <span id="wish-count">0</span> / <span id="wish-total">6</span>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+            <div class="hud-jar">
+                <div class="jar-icon">🫙</div>
+            </div>
+        </div>
+
+        <canvas id="game-canvas"></canvas>
+
+        <!-- Wish Reveal Popup -->
+        <div id="wish-popup" class="wish-popup">
+            <div class="popup-card">
+                <div class="popup-glow"></div>
+                <div class="popup-star">⭐</div>
+                <p class="popup-wish-text" id="popup-wish-text"></p>
+                <button class="popup-close-btn" onclick="closeWishPopup()">Continue ✨</button>
+            </div>
+        </div>
+
+        <p class="game-hint" id="game-hint">Tap the shooting stars! ☄️</p>
+    </div>
+
+    <!-- ========== FINAL REVEAL SCREEN ========== -->
+    <div id="reveal-screen" class="screen">
+        <canvas id="heart-canvas"></canvas>
+        <div class="reveal-content">
+            <div class="reveal-emoji">💫</div>
+            <h2 class="reveal-title">
+                <span class="reveal-line">Every star in the sky</span>
+                <span class="reveal-line accent">chose you.</span>
+            </h2>
+            <div class="reveal-image-ring">
+                <img src="images/her.png" alt="You" class="reveal-image" id="reveal-image">
+                <div class="ring-orbit">
+                    <span class="orbit-star">⭐</span>
+                    <span class="orbit-star">✨</span>
+                    <span class="orbit-star">💫</span>
+                    <span class="orbit-star">⭐</span>
+                    <span class="orbit-star">✨</span>
+                    <span class="orbit-star">💫</span>
+                </div>
+            </div>
+            <p class="reveal-message" id="reveal-message">You are the wish that came true. 💙</p>
+            <button class="magic-btn restart-btn" onclick="restartGame()">
+                <span class="btn-text">🌙 Wish Again</span>
+                <span class="btn-shimmer"></span>
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

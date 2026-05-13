@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gujju Vibe Check ✨</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap"
+        rel="stylesheet" />
+
+    <style>
+        /* ===========================
+       CSS VARIABLES & RESET
+    =========================== */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #fdf4e3;
+            /* Warmer, slightly desi vibe background */
+            --purple: #fb923c;
+            /* Orange/Saffron hue */
+            --purple-dk: #ea580c;
+            --pink: #f43f5e;
+            /* Vibrant pink/red */
+            --pink-dk: #e11d48;
+            --white: #ffffff;
+            --text: #431407;
+            /* Deep brown/warm text */
+            --text-soft: #9a3412;
+            --card-r: 24px;
+            --shadow: 0 8px 40px rgba(234, 88, 12, .15);
+            --shadow-lg: 0 16px 60px rgba(234, 88, 12, .25);
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* ===========================
+       DECORATIVE BLOBS (background)
+    =========================== */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: .35;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .blob-1 {
+            width: 420px;
+            height: 420px;
+            background: var(--purple);
+            top: -100px;
+            left: -120px;
+        }
+
+        .blob-2 {
+            width: 360px;
+            height: 360px;
+            background: var(--pink);
+            bottom: -80px;
+            right: -100px;
+        }
+
+        .blob-3 {
+            width: 200px;
+            height: 200px;
+            background: #fde68a;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* ===========================
+       SCREENS (intro / game / result)
+    =========================== */
+        .screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 24px;
+            transition: opacity .5s ease, transform .5s ease;
+        }
+
+        .screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(.96);
+        }
+
+        /* ===========================
+       INTRO SCREEN
+    =========================== */
+        #intro {
+            gap: 20px;
+            text-align: center;
+        }
+
+        .intro-emoji {
+            font-size: 72px;
+            animation: floaty 2.8s ease-in-out infinite;
+        }
+
+        @keyframes floaty {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        .intro-made-for {
+            font-size: clamp(13px, 4vw, 15px);
+            font-weight: 600;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--text-soft);
+        }
+
+        .intro-name {
+            font-size: clamp(32px, 10vw, 52px);
+            font-weight: 800;
+            line-height: 1.1;
+            background: linear-gradient(135deg, var(--purple-dk), var(--pink-dk));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .intro-sub {
+            font-size: clamp(14px, 4vw, 16px);
+            color: var(--text-soft);
+            font-weight: 500;
+        }
+
+        .intro-bar {
+            width: 120px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--purple), var(--pink));
+            border-radius: 99px;
+            animation: grow-bar 2s ease forwards;
+        }
+
+        @keyframes grow-bar {
+            from {
+                width: 0;
+            }
+
+            to {
+                width: 120px;
+            }
+        }
+
+        /* ===========================
+       GAME SCREEN
+    =========================== */
+        #game {
+            gap: 0;
+            justify-content: flex-start;
+            padding-top: 28px;
+        }
+
+        /* Progress bar */
+        .progress-wrap {
+            width: 100%;
+            max-width: 480px;
+            margin-bottom: 18px;
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-soft);
+            margin-bottom: 8px;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 8px;
+            background: rgba(234, 88, 12, .2);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--purple), var(--pink));
+            border-radius: 99px;
+            transition: width .4s cubic-bezier(.4, 0, .2, 1);
+        }
+
+        /* Card area */
+        .card-area {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Question card */
+        .q-card {
+            position: absolute;
+            width: 100%;
+            background: var(--white);
+            border-radius: 28px;
+            padding: 28px 24px 32px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transition: opacity .45s ease, transform .45s cubic-bezier(.4, 0, .2, 1);
+            will-change: transform, opacity;
+        }
+
+        .q-card.exit-left {
+            opacity: 0;
+            transform: translateX(-110%) rotate(-14deg);
+        }
+
+        .q-card.exit-right {
+            opacity: 0;
+            transform: translateX(110%) rotate(14deg);
+        }
+
+        .q-card.enter {
+            animation: card-enter .45s cubic-bezier(.34, 1.48, .64, 1) forwards;
+        }
+
+        @keyframes card-enter {
+            from {
+                opacity: 0;
+                transform: translateY(40px) scale(.93);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .q-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #ffedd5, #ffe4e6);
+            color: var(--purple-dk);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 5px 12px;
+            border-radius: 99px;
+            align-self: flex-start;
+        }
+
+        .q-tag::before {
+            content: '✦';
+            font-size: 9px;
+        }
+
+        .q-question {
+            font-size: clamp(22px, 6vw, 30px);
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--text);
+            text-align: center;
+        }
+
+        /* Choice buttons */
+        .choices {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .choice-btn {
+            background: linear-gradient(145deg, #fff7ed, #fff);
+            border: 2.5px solid rgba(234, 88, 12, .25);
+            border-radius: 20px;
+            padding: 20px 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .choice-btn:hover {
+            border-color: var(--purple);
+            box-shadow: 0 6px 24px rgba(234, 88, 12, .3);
+            background: linear-gradient(145deg, #ffedd5, #ffe4e6);
+            animation: wobble .4s ease;
+        }
+
+        .choice-btn:active {
+            transform: scale(.95);
+        }
+
+        /* Chosen feedback flash */
+        .choice-btn.chosen {
+            background: linear-gradient(145deg, var(--purple), var(--pink-dk));
+            border-color: var(--purple-dk);
+            color: white;
+        }
+
+        .choice-btn.chosen .choice-label {
+            color: white;
+        }
+
+        @keyframes wobble {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-2deg);
+            }
+
+            50% {
+                transform: rotate(2deg);
+            }
+
+            75% {
+                transform: rotate(-1.5deg);
+            }
+
+            100% {
+                transform: rotate(0deg);
+            }
+        }
+
+        .choice-icon {
+            font-size: 36px;
+            line-height: 1;
+        }
+
+        .choice-label {
+            font-size: clamp(14px, 4vw, 17px);
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .choice-or {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-soft);
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            gap: 6px;
+            margin: -4px 0;
+        }
+
+        .choice-or::before,
+        .choice-or::after {
+            content: '';
+            flex: 1;
+            height: 1.5px;
+            background: linear-gradient(90deg, transparent, rgba(234, 88, 12, .3));
+        }
+
+        .choice-or::after {
+            transform: scaleX(-1);
+        }
+
+        /* ===========================
+       RESULT SCREEN
+    =========================== */
+        #result {
+            gap: 20px;
+            text-align: center;
+            overflow-y: auto;
+        }
+
+        .result-header {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--text-soft);
+        }
+
+        .result-card {
+            background: var(--white);
+            border-radius: 28px;
+            padding: 36px 28px;
+            box-shadow: var(--shadow-lg);
+            max-width: 440px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            animation: card-enter .6s cubic-bezier(.34, 1.48, .64, 1) forwards;
+        }
+
+        .result-emoji {
+            font-size: 80px;
+            line-height: 1;
+            animation: floaty 3s ease-in-out infinite;
+        }
+
+        .result-badge {
+            background: linear-gradient(135deg, #ffedd5, #ffe4e6);
+            color: var(--purple-dk);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 99px;
+        }
+
+        .result-title {
+            font-size: clamp(26px, 8vw, 36px);
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--purple-dk), var(--pink-dk));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.15;
+        }
+
+        .result-desc {
+            font-size: clamp(14px, 4vw, 16px);
+            color: var(--text-soft);
+            font-weight: 500;
+            line-height: 1.6;
+            max-width: 320px;
+        }
+
+        .result-divider {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--purple), var(--pink));
+            border-radius: 99px;
+        }
+
+        /* CTA button */
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--purple-dk), var(--pink-dk));
+            color: white;
+            border: none;
+            border-radius: 99px;
+            padding: 14px 28px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 24px rgba(234, 88, 12, .4);
+            transition: transform .18s ease, box-shadow .18s ease;
+            letter-spacing: .02em;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 10px 32px rgba(234, 88, 12, .5);
+        }
+
+        .cta-btn:active {
+            transform: scale(.97);
+        }
+
+        .copied-toast {
+            font-size: 12px;
+            color: var(--purple-dk);
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity .3s ease;
+            height: 16px;
+        }
+
+        .copied-toast.show {
+            opacity: 1;
+        }
+
+        /* Play again */
+        .again-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: transparent;
+            border: 2.5px solid rgba(234, 88, 12, .4);
+            color: var(--text-soft);
+            border-radius: 99px;
+            padding: 10px 24px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: border-color .18s, color .18s, background .18s;
+            letter-spacing: .04em;
+        }
+
+        .again-btn:hover {
+            border-color: var(--purple);
+            color: var(--purple-dk);
+            background: rgba(234, 88, 12, .07);
+        }
+
+        /* ===========================
+       CONFETTI CANVAS
+    =========================== */
+        #confetti-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* ===========================
+       MOBILE TWEAKS
+    =========================== */
+        @media (max-width: 400px) {
+            #game {
+                padding-top: 20px;
+            }
+
+            .q-card {
+                padding: 22px 18px 26px;
+            }
+
+            .choice-btn {
+                padding: 16px 10px;
+            }
+
+            .choice-icon {
+                font-size: 30px;
+            }
+        }
+
+        @media (min-height: 800px) {
+            .card-area {
+                max-height: 580px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Decorative blobs -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <!-- Confetti canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- ============================
+     INTRO SCREEN
+============================= -->
+    <div class="screen" id="intro">
+        <div class="intro-emoji">🪔</div>
+        <p class="intro-made-for">Let's find out</p>
+        <h1 class="intro-name">Gujju Vibe Check ✨</h1>
+        <p class="intro-sub">A little game to know your true desi personality 🎀</p>
+        <div class="intro-bar"></div>
+    </div>
+
+    <!-- ============================
+     GAME SCREEN
+============================= -->
+    <div class="screen hidden" id="game">
+
+        <!-- Progress bar -->
+        <div class="progress-wrap">
+            <div class="progress-meta">
+                <span id="progress-label">Question 1 of 10</span>
+                <span id="progress-pct">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+            </div>
+        </div>
+
+        <!-- Card stack area -->
+        <div class="card-area" id="card-area">
+            <!-- Cards injected by JS -->
+        </div>
+
+    </div>
+
+    <!-- ============================
+     RESULT SCREEN
+============================= -->
+    <div class="screen hidden" id="result">
+        <p class="result-header">Your vibe is…</p>
+        <div class="result-card" id="result-card">
+            <div class="result-emoji" id="result-emoji">🌸</div>
+            <span class="result-badge" id="result-badge">Vibe Type</span>
+            <h2 class="result-title" id="result-title">Result Title</h2>
+            <div class="result-divider"></div>
+            <p class="result-desc" id="result-desc">Description here.</p>
+            <button class="cta-btn" id="cta-btn">
+                Share my Gujju Score 💌
+            </button>
+            <span class="copied-toast" id="copied-toast">Copied to clipboard! ✓</span>
+        </div>
+        <button class="again-btn" id="again-btn">↺ Play again</button>
+    </div>
+
+    <script>
+        /* =========================================================
+           DATA: 10 Questions
+           Each question has a tag, a prompt, and two choices.
+           "weight" determines the result scoring:
+             - choice A is more "Traditional / Cozy Gujju"
+             - choice B is more "Trendy / Modern / Outgoing"
+        ========================================================= */
+        const questions = [
+            {
+                tag: "Beverage check",
+                q: "What keeps you going?",
+                a: { icon: "☕", label: "Kadak Masala Chai", weight: 0 },
+                b: { icon: "🥛", label: "Thandi Masala Chaas", weight: 1 }
+            },
+            {
+                tag: "Sunday Morning",
+                q: "Ultimate weekend breakfast?",
+                a: { icon: "🥨", label: "Fafda-Jalebi", weight: 0 },
+                b: { icon: "🍛", label: "Surti Locho / Khaman", weight: 1 }
+            },
+            {
+                tag: "Late night vibe",
+                q: "It's 11 PM, where are you?",
+                a: { icon: "🍧", label: "Eating Baraf Gola", weight: 1 },
+                b: { icon: "🚗", label: "Long drive on SG Highway", weight: 2 }
+            },
+            {
+                tag: "Festivity meter",
+                q: "Navratri plan?",
+                a: { icon: "🪔", label: "Sheri Garba", weight: 0 },
+                b: { icon: "🕺", label: "VIP Passes / Party Plot", weight: 2 }
+            },
+            {
+                tag: "Vacation goals",
+                q: "Quick getaway destination?",
+                a: { icon: "⛰️", label: "Mount Abu / Saputara", weight: 0 },
+                b: { icon: "🏖️", label: "Spontaneous Diu/Goa", weight: 2 }
+            },
+            {
+                tag: "Snack attack",
+                q: "Mid-day hunger strikes...",
+                a: { icon: "🫓", label: "Thepla & Chundo", weight: 0 },
+                b: { icon: "🍔", label: "Cheese Peri-Peri Dabeli", weight: 1 }
+            },
+            {
+                tag: "Language mode",
+                q: "How do you text?",
+                a: { icon: "🗣️", label: "Pure Gujju Slang", weight: 0 },
+                b: { icon: "📱", label: "Hinglish + Memes", weight: 2 }
+            },
+            {
+                tag: "Weekend plans",
+                q: "Ideal Saturday night?",
+                a: { icon: "🏡", label: "Family Dinner", weight: 0 },
+                b: { icon: "🏏", label: "Box Cricket till 2 AM", weight: 2 }
+            },
+            {
+                tag: "Retail therapy",
+                q: "Shopping location?",
+                a: { icon: "🛍️", label: "Street Shopping (Law Garden)", weight: 0 },
+                b: { icon: "👗", label: "Mall Hopping / Zara", weight: 1 }
+            },
+            {
+                tag: "Sweet cravings",
+                q: "What's for dessert?",
+                a: { icon: "🍮", label: "Garam Mohanthal", weight: 0 },
+                b: { icon: "🍰", label: "Biscoff Cheesecake", weight: 2 }
+            }
+        ];
+
+        /* =========================================================
+           RESULTS: 4 vibe types based on score (Max score = 15)
+        ========================================================= */
+        const results = [
+            {
+                minScore: 0,
+                maxScore: 3,
+                emoji: "🪔",
+                badge: "Asal Gujju",
+                title: "The Asal Gujarati",
+                desc: "You are pure, unadulterated Gujarati at heart. Thepla, chai, and cozy family time are your safe spaces. Don't ever change!",
+                message: "I got 'The Asal Gujarati' on the Gujju Vibe Check! What does that say about me? 👀"
+            },
+            {
+                minScore: 4,
+                maxScore: 7,
+                emoji: "🥨",
+                badge: "Balanced Soul",
+                title: "The Sweet Dhokla",
+                desc: "You appreciate your roots but love a good modern twist. You can enjoy a fancy cafe just as much as a tapri ni chai.",
+                message: "I got 'The Sweet Dhokla' on the Gujju Vibe Check! What does that say about me? 👀"
+            },
+            {
+                minScore: 8,
+                maxScore: 11,
+                emoji: "🕺",
+                badge: "The Vibe Checker",
+                title: "The Navratri Rockstar",
+                desc: "You are the life of the party! Always ready for a midnight gola plan, a box cricket match, or dancing till 3 AM.",
+                message: "I got 'The Navratri Rockstar' on the Gujju Vibe Check! What does that say about me? 👀"
+            },
+            {
+                minScore: 12,
+                maxScore: 99,
+                emoji: "🚀",
+                badge: "Gen-Z Gujju",
+                title: "The Modern Gujju",
+                desc: "You are all about the aesthetics, latest trends, and spontaneous trips. You live for the gram and the next big adventure!",
+                message: "I got 'The Modern Gujju' on the Gujju Vibe Check! What does that say about me? 👀"
+            }
+        ];
+
+        /* =========================================================
+           STATE
+        ========================================================= */
+        let currentQ = 0;
+        let totalScore = 0;
+        let choosing = false;
+
+        /* =========================================================
+           HELPERS: screen transitions
+        ========================================================= */
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+            const el = document.getElementById(id);
+            el.classList.remove('hidden');
+        }
+
+        /* =========================================================
+           PROGRESS BAR
+        ========================================================= */
+        function updateProgress(n) {
+            const pct = Math.round((n / questions.length) * 100);
+            document.getElementById('progress-fill').style.width = pct + '%';
+            document.getElementById('progress-label').textContent =
+                `Question ${Math.min(n + 1, questions.length)} of ${questions.length}`;
+            document.getElementById('progress-pct').textContent = pct + '%';
+        }
+
+        /* =========================================================
+           CARD: build a question card DOM element
+        ========================================================= */
+        function buildCard(index) {
+            const q = questions[index];
+            const card = document.createElement('div');
+            card.className = 'q-card enter';
+            card.innerHTML = `
+      <span class="q-tag">${q.tag}</span>
+      <h2 class="q-question">${q.q}</h2>
+      <div class="choice-or">or</div>
+      <div class="choices">
+        <button class="choice-btn" data-choice="a" aria-label="${q.a.label}">
+          <span class="choice-icon">${q.a.icon}</span>
+          <span class="choice-label">${q.a.label}</span>
+        </button>
+        <button class="choice-btn" data-choice="b" aria-label="${q.b.label}">
+          <span class="choice-icon">${q.b.icon}</span>
+          <span class="choice-label">${q.b.label}</span>
+        </button>
+      </div>
+    `;
+            return card;
+        }
+
+        /* =========================================================
+           CHOICE: handle a tap/click
+        ========================================================= */
+        function handleChoice(card, choiceKey) {
+            if (choosing) return;
+            choosing = true;
+
+            const q = questions[currentQ];
+            const chosen = q[choiceKey];
+
+            // Visual feedback: highlight chosen button
+            const btns = card.querySelectorAll('.choice-btn');
+            btns.forEach(b => {
+                if (b.dataset.choice === choiceKey) b.classList.add('chosen');
+            });
+
+            // Accumulate score
+            totalScore += chosen.weight;
+
+            // Determine exit direction
+            const exitClass = choiceKey === 'a' ? 'exit-left' : 'exit-right';
+
+            setTimeout(() => {
+                card.classList.remove('enter');
+                card.classList.add(exitClass);
+
+                setTimeout(() => {
+                    card.remove();
+                    currentQ++;
+
+                    if (currentQ < questions.length) {
+                        updateProgress(currentQ);
+                        const nextCard = buildCard(currentQ);
+                        document.getElementById('card-area').appendChild(nextCard);
+                        attachCardListeners(nextCard);
+                    } else {
+                        showResult();
+                    }
+
+                    choosing = false;
+                }, 440);
+            }, 200);
+        }
+
+        function attachCardListeners(card) {
+            card.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.addEventListener('click', () => handleChoice(card, btn.dataset.choice));
+            });
+        }
+
+        /* =========================================================
+           RESULT: compute and display
+        ========================================================= */
+        function showResult() {
+            // Determine result based on score
+            let vibe = results[results.length - 1];
+            for (const r of results) {
+                if (totalScore >= r.minScore && totalScore <= r.maxScore) {
+                    vibe = r;
+                    break;
+                }
+            }
+
+            document.getElementById('result-emoji').textContent = vibe.emoji;
+            document.getElementById('result-badge').textContent = vibe.badge;
+            document.getElementById('result-title').textContent = vibe.title;
+            document.getElementById('result-desc').textContent = vibe.desc;
+
+            // Store message for clipboard
+            document.getElementById('cta-btn').dataset.message = vibe.message;
+
+            showScreen('result');
+            launchConfetti();
+        }
+
+        /* =========================================================
+           CTA: copy to clipboard
+        ========================================================= */
+        document.getElementById('cta-btn').addEventListener('click', function () {
+            const msg = this.dataset.message || "I got a fun result on Gujju Vibe Check! 👀";
+            navigator.clipboard.writeText(msg).catch(() => {
+                // fallback for older browsers
+                const ta = document.createElement('textarea');
+                ta.value = msg;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+            });
+            const toast = document.getElementById('copied-toast');
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2200);
+        });
+
+        /* =========================================================
+           PLAY AGAIN
+        ========================================================= */
+        document.getElementById('again-btn').addEventListener('click', () => {
+            currentQ = 0;
+            totalScore = 0;
+            choosing = false;
+
+            // Clear old card
+            document.getElementById('card-area').innerHTML = '';
+
+            // Reset progress
+            updateProgress(0);
+
+            // Build first card
+            const firstCard = buildCard(0);
+            document.getElementById('card-area').appendChild(firstCard);
+            attachCardListeners(firstCard);
+
+            showScreen('game');
+        });
+
+        /* =========================================================
+           CONFETTI (pure JS, no library)
+        ========================================================= */
+        function launchConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const colors = ['#ea580c', '#fb923c', '#f43f5e', '#e11d48', '#fde68a', '#86efac'];
+            const pieces = [];
+            const count = 120;
+
+            for (let i = 0; i < count; i++) {
+                pieces.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    w: Math.random() * 10 + 5,
+                    h: Math.random() * 6 + 3,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    rot: Math.random() * 360,
+                    vx: (Math.random() - .5) * 3,
+                    vy: Math.random() * 3 + 2,
+                    vr: (Math.random() - .5) * 8,
+                    opacity: 1
+                });
+            }
+
+            let frame;
+            let elapsed = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                elapsed++;
+                let alive = false;
+
+                for (const p of pieces) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.rot += p.vr;
+                    p.vy += .08; // gravity
+
+                    // Fade out after 120 frames
+                    if (elapsed > 120) p.opacity -= .012;
+                    p.opacity = Math.max(0, p.opacity);
+                    if (p.opacity > 0) alive = true;
+
+                    ctx.save();
+                    ctx.globalAlpha = p.opacity;
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot * Math.PI / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                    ctx.restore();
+                }
+
+                if (alive) {
+                    frame = requestAnimationFrame(draw);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    cancelAnimationFrame(frame);
+                }
+            }
+
+            draw();
+        }
+
+        /* =========================================================
+           INTRO → GAME transition (2 second pause)
+        ========================================================= */
+        window.addEventListener('load', () => {
+            // Build first card immediately (off-screen)
+            const firstCard = buildCard(0);
+            document.getElementById('card-area').appendChild(firstCard);
+            attachCardListeners(firstCard);
+            updateProgress(0);
+
+            // After 2.2s, auto-transition to game
+            setTimeout(() => {
+                showScreen('game');
+            }, 2200);
+        });
+
+        // Handle canvas resize
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti-canvas');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+
+</html>
